@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="#">
+    <title>Social Media Sentiment</title>
+    <!-- Add some CSS to change client UI -->
+    <style>
+    body {
+        background-color: #232F3E;
+        text-align: center;
+    }
+    label, button, input {
+        color: #FF9900;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 20px;
+        text-align: center;
+    }
+    input[type=date], input[type=file] {
+        color: #777777;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 20px;
+        text-align: center;
+    }
+    h1, h2 {
+        color: #6eb6f5;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    select {
+        /*color: #FF9900;*/
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 18px;
+    }
+    form  { display: table;      }
+    p     { display: table-row;  }
+    label, input, select { display: table-cell; }
+    .container {
+        padding: 0;
+        margin: 0;
+    }
+    .left-element, .right-element {
+        display: inline-block;
+        float: left;
+        margin-left: 20px;
+    }
+    .righter-element {
+        display: inline-block;
+        float: right;
+        margin-left: 20px;
+    }
+    </style>
+    <script>
+        // var form = document.getElementById("myForm");
+        // function handleForm(event) { event.preventDefault(); } 
+        // form.addEventListener('submit', handleForm);
+        function fileSelected() {
+            file = document.getElementById("meme").files[0];
+            console.log(file.name);
+            if(file != undefined){
+                document.getElementById("filename").innerHTML = file.name;
+            }
+        }
+
+        function commentTypeSelected() {
+            var commentTypeSelect = document.getElementById("commentType");
+            var i = commentTypeSelect.selectedIndex;
+            var selected = commentTypeSelect.options[i];
+            var commentdiv = document.getElementById("comment");
+            var uploaddiv = document.getElementById("memeupload");
+            console.log(i);
+            if (selected.text === "Meme data") {
+                commentdiv.style.display = "none";
+                uploaddiv.style.display = "block";
+            }
+            else{
+                commentdiv.style.display = "block";
+                uploaddiv.style.display = "none";
+            }
+        }
+
+        // define the callAPI function that takes a first name and last name as parameters
+        var callAPI = (firstName,lastName)=>{
+            // instantiate a headers object
+            var myHeaders = new Headers();
+            // add content type header to object
+            myHeaders.append("Content-Type", "application/json");
+            // using built in JSON utility package turn object to string and store in a variable
+            var raw = JSON.stringify({"firstName":firstName,"lastName":lastName});
+            // create a JSON object with parameters for API call and store in a variable
+            var requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+            // make API call with parameters and use promises to get response
+            fetch("https://7in6nk2539.execute-api.us-west-2.amazonaws.com/v13", requestOptions)
+            .then(response => response.text())
+            .then(result => alert(JSON.parse(result).body))
+            .catch(error => console.log('error', error));
+        }
+
+        function uploadmeme() {
+            let meme = document.getElementById('meme').files[0];
+            // const upload_meme = (file) => {
+            invoke_url = 'https://7in6nk2539.execute-api.us-west-2.amazonaws.com/v13/upload-image/' + meme.name;
+            fetch(invoke_url, {
+                method: 'PUT',
+                headers: {},
+                body: meme
+            }).then(
+                response => response.json() // if the response is a JSON object
+            ).then(
+                success => console.log(success) // Handle the success response object
+            ).catch(
+                error => console.log(error) // Handle the error response object
+            );
+
+            console.log(meme.name);
+
+        }
+
+        function uploadData() {
+            let firstName = document.getElementById('firstName').value;
+            let lastName = document.getElementById('lastName').value;
+            let username = document.getElementById('username').value;
+            let bio = document.getElementById('bio').value;
+            let age = document.getElementById('age').value;
+            let dob = document.getElementById('DOB').value;
+            let gender = document.getElementById('gender').value;
+            let phone = document.getElementById('phone').value;
+            let country = document.getElementById('country').value;
+            let state = document.getElementById('state').value;
+            let county = document.getElementById('county').value;
+            let city = document.getElementById('city').value;
+            let address = document.getElementById('address').value;
+            let zip = document.getElementById('zip').value;
+            let meme = document.getElementById('meme').files[0];
+            let com = document.getElementById('userComment').value;
+
+            let commentTypeSelect = document.getElementById("commentType");
+            let selected = commentTypeSelect.options[commentTypeSelect.selectedIndex];
+
+            var today = new Date();
+
+
+            // window.alert(today.getTime());
+            // const form = new FormData();
+            const json = {
+                'UserInfo': {
+                    'FirstName': firstName,
+                    'LastName': lastName,
+                    'UserName': username,
+                    'Bio': bio,
+                    'Age': age,
+                    'DOB': dob,
+                    'Gender': gender,
+                    'Phone': phone,
+                    'Location': {
+                        "Country": country, 
+                        "State": state, 
+                        "County": county, 
+                        "City": city, 
+                        "Address": address, 
+                        "Zip": zip
+                    }
+                }, 
+                "CreationDate": today.getTime(), 
+                "Filename": ((selected.text === "Meme data") ? meme.name : ""),
+                "UserComment": com
+            };
+
+            // window.alert(today.getTime());
+
+            if(selected.text === "Meme data") {
+                invoke_url = 'https://7in6nk2539.execute-api.us-west-2.amazonaws.com/v13/upload-image-data/' + username + today.getTime() + ".json";
+                fetch(invoke_url, {
+                    method: 'PUT',
+                    headers: {},
+                    body: JSON.stringify(json, null, 4)
+                }).then(
+                    response => response.json() // if the response is a JSON object
+                ).then(
+                    success => console.log(success) // Handle the success response object
+                ).catch(
+                    error => console.log(error) // Handle the error response object
+                );
+            }
+            else {
+                invoke_url = 'https://7in6nk2539.execute-api.us-west-2.amazonaws.com/v13/upload-text-data/' + username + today.getTime() + ".json";
+                fetch(invoke_url, {
+                    method: 'PUT',
+                    headers: {},
+                    body: JSON.stringify(json, null, 4)
+                }).then(
+                    response => response.json() // if the response is a JSON object
+                ).then(
+                    success => console.log(success) // Handle the success response object
+                ).catch(
+                    error => console.log(error) // Handle the error response object
+                );
+            }
+
+            // window.alert(json);
+            // create request
+        }
+    </script>
+</head>
+<body>
+    <!-- <form>
+        <label>First Name :</label>
+        <input type="text" id="fName">
+        <label>Last Name :</label>
+        <input type="text" id="lName">
+        <button type="button" onclick="callAPI(document.getElementById('fName').value,document.getElementById('lName').value)">Call API</button>
+    </form>
+    <hr> -->
+    <h1>Detecting Sentiment in Social Media Comments</h1>
+    <center>
+        <form>
+            <div id="comType">
+                <label for="commentType">Comment Type:</label>
+                <select name="commentType" id="commentType" onchange="commentTypeSelected()">
+                    <option value="none" selected disabled hidden>Select a comment type</option>
+                    <option value="Text Data" id="textadata">Text data</option>
+                    <option value="Meme Data" id="memetadata">Meme data</option>
+                </select>
+            </div>
+        </form>
+    </center>
+    <hr>
+    <div id="memeupload" style="display: none;">
+        <h2>Meme Upload:</h2>
+        <center>
+            <form id="myImageForm">
+                <center>
+                    <label>Select an image:</label>
+                    <input onchange="fileSelected()" type="file" id="meme" name="meme">
+                    <br>
+                    <button type="button" onclick="uploadmeme()" name="submit">Upload meme</button>
+                </center>
+            </form>
+        </center>
+        <br><hr>
+    </div>
+    <h2>Comment Metadata:</h2>
+    <center>
+        <form>
+            <div class="container">
+                <div class="left-element" id="userInfo" float="left">
+                    <label>First Name: </label>
+                    <input type="text" id="firstName" placeholder="Josh">
+
+                    <label>Last Name: </label>
+                    <input type="text" id="lastName" placeholder="Mehr">
+
+                    <label>Username: </label>
+                    <input type="text" id="username" placeholder="joshmehr">
+
+                    <label>Bio: </label>
+                    <input type="text" id="bio" placeholder="Cool dood likes food">
+
+                    <label>Age: </label>
+                    <input type="number" id="age" placeholder="22">
+
+                    <label>Date of Birth: </label>
+                    <input type="date" id="DOB" placeholder="05/19/2000">
+
+                    <label>Gender: </label>
+                    <input type="text" id="gender" placeholder="male">
+
+                    <label>Phone: </label>
+                    <input type="tel" id="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}">
+                </div>
+                <div class="right-element" id="location" float="left">
+                    <label>Country: </label>
+                    <input type="text" id="country">
+
+                    <label>State: </label>
+                    <input type="text" id="state">
+
+                    <label>County: </label>
+                    <input type="text" id="county">
+
+                    <label>City: </label>
+                    <input type="text" id="city">
+
+                    <label>Address: </label>
+                    <input type="text" id="address">
+
+                    <label>Zip: </label>
+                    <input type="number" id="zip">
+
+                    <div id="comment">
+                        <label for="userComment">Comment</label>
+                        <input type="text" id="userComment">
+                    </div>
+                    <br>
+                    <button type="button" name="submit" onclick="uploadData()">Submit</button>
+                </div>
+                <!-- <div class="righter-element" float="left">
+                    
+                </div> -->
+            </div>
+        </form>
+    </center>
+</body>
+</html>
