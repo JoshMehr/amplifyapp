@@ -11,16 +11,26 @@
         text-align: center;
     }
     label, button, input {
-        color: #FF9900;
+        /*color: #FF9900;*/
         font-family: Arial, Helvetica, sans-serif;
         font-size: 20px;
         text-align: center;
     }
-    input[type=date], input[type=file] {
+    div {
+        color: #FF9900;
+    }
+    input[type=date] {
         color: #777777;
         font-family: Arial, Helvetica, sans-serif;
         font-size: 20px;
         text-align: center;
+    }
+    input[type=file] {
+        color: #777777;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 20px;
+        text-align: center;
+        border-style: groove;
     }
     h1, h2 {
         color: #6eb6f5;
@@ -30,6 +40,7 @@
         /*color: #FF9900;*/
         font-family: Arial, Helvetica, sans-serif;
         font-size: 18px;
+        text-align: center;
     }
     form  { display: table;      }
     p     { display: table-row;  }
@@ -56,11 +67,19 @@
         var idToken = null;
 
         function checkLogin() {
-            var url_string = window.location.href;
-            var url = new URL(url_string);
-            idToken = url.searchParams.get("id_token");
+            var url = window.location.href;
+            var updated_url = url;
+            if (url.indexOf("#") != -1) {
+                updated_url = url.substring(0,url.indexOf("#")) + "?" + url.substring(url.indexOf("#")+1);
+                console.log(updated_url);
+            }
+            var newrl = new URL(updated_url);
+            idToken = newrl.searchParams.get("id_token");
+            console.log(idToken);
             if (idToken != null) {
                 document.getElementById("welcomeMsg").innerHTML = "Signed in!";
+                document.getElementById("login").style.display = "none";
+                document.getElementById("authorized").style.display = "block";
                 auth();
             }
         }
@@ -68,10 +87,6 @@
         function auth() {
             AWS.config.update({
               region: "us-west-2",
-            //  endpoint: 'http://localhost:8000', // If you use dynamoDB installed locally
-            //  accessKeyId: "(ACCESS_KEY_ID)",
-            //  secretAccessKey: "(SECRET_ACCESS_KEY)"
-
             });
 
             AWS.config.credentials = new AWS.CognitoIdentityCredentials({
@@ -87,9 +102,9 @@
         function fileSelected() {
             file = document.getElementById("meme").files[0];
             console.log(file.name);
-            if(file != undefined){
-                document.getElementById("filename").innerHTML = file.name;
-            }
+            // if(file != undefined){
+            //     document.getElementById("filename").innerHTML = file.name;
+            // }
         }
 
         function commentTypeSelected() {
@@ -239,97 +254,99 @@
 </head>
 <body onload="checkLogin()">
     <div id="login">
-        <a href="https://nautilus-sentiment-analysis.auth.us-west-2.amazoncognito.com/login?client_id=4tk9lrcrvgu2smbva83larcahl&response_type=token&scope=aws.cognito.signin.user.admin+email+openid+phone+profile&redirect_uri=https://master.d14jom2zi1c9wt.amplifyapp.com/">Login</a>
+        <a href="https://nautilus-sentiment-analysis.auth.us-west-2.amazoncognito.com/login?client_id=4tk9lrcrvgu2smbva83larcahl&response_type=token&scope=aws.cognito.signin.user.admin+email+openid+phone+profile&redirect_uri=https://master.d14jom2zi1c9wt.amplifyapp.com/" style="color: #FF9900; font-family: Arial, Helvetica, sans-serif; font-size: 70px;">Login</a>
     </div>
-    <div id="welcomeMsg"></div>
-    <h1>Detecting Sentiment in Social Media Comments</h1>
-    <center>
-        <form>
-            <div id="comType">
-                <label for="commentType">Comment Type:</label>
-                <select name="commentType" id="commentType" onchange="commentTypeSelected()">
-                    <option value="none" selected disabled hidden>Select a comment type</option>
-                    <option value="Text Data" id="textadata">Text data</option>
-                    <option value="Meme Data" id="memetadata">Meme data</option>
-                </select>
-            </div>
-        </form>
-    </center>
-    <hr>
-    <div id="memeupload" style="display: none;">
-        <h2>Meme Upload:</h2>
+    <div id="authorized"  style="display: none;">
+        <div id="welcomeMsg"></div>
+        <h1>Detecting Sentiment in Social Media Comments</h1>
         <center>
-            <form id="myImageForm">
-                <center>
-                    <label>Select an image:</label>
-                    <input onchange="fileSelected()" type="file" id="meme" name="meme">
-                    <br>
-                    <button type="button" onclick="uploadmeme()" name="submit">Upload meme</button>
-                </center>
+            <form>
+                <div id="comType">
+                    <label for="commentType">Comment Type:</label>
+                    <select name="commentType" id="commentType" onchange="commentTypeSelected()">
+                        <!-- <option value="none" selected disabled hidden>Select a comment type</option> -->
+                        <option value="Text Data" id="textadata">Text data</option>
+                        <option value="Meme Data" id="memetadata">Meme data</option>
+                    </select>
+                </div>
             </form>
         </center>
-        <br><hr>
-    </div>
-    <h2>Comment Metadata:</h2>
-    <center>
-        <form>
-            <div class="container">
-                <div class="left-element" id="userInfo" float="left">
-                    <label>First Name: </label>
-                    <input type="text" id="firstName" placeholder="Josh">
+        <hr>
+        <div id="memeupload" style="display: none;">
+            <h2>Meme Upload:</h2>
+            <center>
+                <form id="myImageForm">
+                    <center>
+                        <label>Select an image:</label>
+                        <input onchange="fileSelected()" type="file" id="meme" name="meme">
+                        <br>
+                        <button type="button" onclick="uploadmeme()" name="submit">Upload meme</button>
+                    </center>
+                </form>
+            </center>
+            <br><hr>
+        </div>
+        <h2>Comment Metadata:</h2>
+        <center>
+            <form>
+                <div class="container">
+                    <div class="left-element" id="userInfo" float="left">
+                        <label>First Name: </label>
+                        <input type="text" id="firstName" placeholder="Josh">
 
-                    <label>Last Name: </label>
-                    <input type="text" id="lastName" placeholder="Mehr">
+                        <label>Last Name: </label>
+                        <input type="text" id="lastName" placeholder="Mehr">
 
-                    <label>Username: </label>
-                    <input type="text" id="username" placeholder="joshmehr">
+                        <label>Username: </label>
+                        <input type="text" id="username" placeholder="jbone">
 
-                    <label>Bio: </label>
-                    <input type="text" id="bio" placeholder="Cool dood likes food">
+                        <label>Bio: </label>
+                        <input type="text" id="bio" placeholder="Cool dood likes food">
 
-                    <label>Age: </label>
-                    <input type="number" id="age" placeholder="22">
+                        <label>Age: </label>
+                        <input type="number" id="age" placeholder="22">
 
-                    <label>Date of Birth: </label>
-                    <input type="date" id="DOB" placeholder="05/19/2000">
+                        <label>Date of Birth: </label>
+                        <input type="date" id="DOB" placeholder="05/19/2000">
 
-                    <label>Gender: </label>
-                    <input type="text" id="gender" placeholder="male">
+                        <label>Gender: </label>
+                        <input type="text" id="gender" placeholder="Male">
 
-                    <label>Phone: </label>
-                    <input type="tel" id="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}">
-                </div>
-                <div class="right-element" id="location" float="left">
-                    <label>Country: </label>
-                    <input type="text" id="country">
-
-                    <label>State: </label>
-                    <input type="text" id="state">
-
-                    <label>County: </label>
-                    <input type="text" id="county">
-
-                    <label>City: </label>
-                    <input type="text" id="city">
-
-                    <label>Address: </label>
-                    <input type="text" id="address">
-
-                    <label>Zip: </label>
-                    <input type="number" id="zip">
-
-                    <div id="comment">
-                        <label for="userComment">Comment</label>
-                        <input type="text" id="userComment">
+                        <label>Phone: </label>
+                        <input type="tel" id="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="123-456-7890">
                     </div>
-                    <br>
-                    <button type="button" name="submit" onclick="uploadData()">Submit</button>
+                    <div class="right-element" id="location" float="left">
+                        <label>Country: </label>
+                        <input type="text" id="country" placeholder="US">
+
+                        <label>State: </label>
+                        <input type="text" id="state" placeholder="VA">
+
+                        <label>County: </label>
+                        <input type="text" id="county" placeholder="Prince William">
+
+                        <label>City: </label>
+                        <input type="text" id="city" placeholder="Woodbridge">
+
+                        <label>Address: </label>
+                        <input type="text" id="address" placeholder="5432 Nunya Street">
+
+                        <label>Zip: </label>
+                        <input type="number" id="zip" placeholder="22222">
+
+                        <div id="comment">
+                            <label for="userComment">Comment</label>
+                            <input type="text" id="userComment" placeholder="Dope website!!">
+                        </div>
+                        <br>
+                        <button type="button" name="submit" onclick="uploadData()">Submit</button>
+                    </div>
+                    <!-- <div class="righter-element" float="left">
+                        
+                    </div> -->
                 </div>
-                <!-- <div class="righter-element" float="left">
-                    
-                </div> -->
-            </div>
-        </form>
-    </center>
+            </form>
+        </center>
+    </div>
 </body>
 </html>
