@@ -10,6 +10,11 @@
       "StackName": "amplify-sentimentanalysis-dev-113942",
       "StackId": "arn:aws:cloudformation:us-west-2:226547580460:stack/amplify-sentimentanalysis-dev-113942/5144f700-0d12-11ed-8408-02f8180353cf",
       "AmplifyAppId": "d14jom2zi1c9wt"
+    },
+    "categories": {
+      "auth": {
+        "SentimentAnalysis": {}
+      }
     }
   }
 }

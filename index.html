@@ -49,10 +49,41 @@
         margin-left: 20px;
     }
     </style>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.16.min.js"></script>
+    <script src="src/aws-cognito-sdk.min.js"></script>
+    <script src="src/amazon-cognito-identity.min.js"></script>
     <script>
-        // var form = document.getElementById("myForm");
-        // function handleForm(event) { event.preventDefault(); } 
-        // form.addEventListener('submit', handleForm);
+        var idToken = null;
+
+        function checkLogin() {
+            var url_string = window.location.href;
+            var url = new URL(url_string);
+            idToken = url.searchParams.get("id_token");
+            if (idToken != null) {
+                document.getElementById("welcomeMsg").innerHTML = "Signed in!";
+                auth();
+            }
+        }
+
+        function auth() {
+            AWS.config.update({
+              region: "us-west-2",
+            //  endpoint: 'http://localhost:8000', // If you use dynamoDB installed locally
+            //  accessKeyId: "(ACCESS_KEY_ID)",
+            //  secretAccessKey: "(SECRET_ACCESS_KEY)"
+
+            });
+
+            AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+                IdentityPoolId : 'us-west-2:ce97a3cc-dd03-412a-84ea-f7375114de7d',
+                Logins : {
+                  "cognito-idp.us-west-2.amazonaws.com/us-west-2_nY1rGTUlG": idToken
+                }
+            });
+        }
+
+        // ----------------------
+
         function fileSelected() {
             file = document.getElementById("meme").files[0];
             console.log(file.name);
@@ -206,15 +237,11 @@
         }
     </script>
 </head>
-<body>
-    <!-- <form>
-        <label>First Name :</label>
-        <input type="text" id="fName">
-        <label>Last Name :</label>
-        <input type="text" id="lName">
-        <button type="button" onclick="callAPI(document.getElementById('fName').value,document.getElementById('lName').value)">Call API</button>
-    </form>
-    <hr> -->
+<body onload="checkLogin()">
+    <div id="login">
+        <a href="https://nautilus-sentiment-analysis.auth.us-west-2.amazoncognito.com/login?client_id=4tk9lrcrvgu2smbva83larcahl&response_type=token&scope=aws.cognito.signin.user.admin+email+openid+phone+profile&redirect_uri=https://master.d14jom2zi1c9wt.amplifyapp.com/">Login</a>
+    </div>
+    <div id="welcomeMsg"></div>
     <h1>Detecting Sentiment in Social Media Comments</h1>
     <center>
         <form>
