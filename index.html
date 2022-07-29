@@ -102,6 +102,7 @@
         function fileSelected() {
             file = document.getElementById("meme").files[0];
             console.log(file.name);
+            document.getElementById("filename").value = file.name;
             // if(file != undefined){
             //     document.getElementById("filename").innerHTML = file.name;
             // }
@@ -113,14 +114,19 @@
             var selected = commentTypeSelect.options[i];
             var commentdiv = document.getElementById("comment");
             var uploaddiv = document.getElementById("memeupload");
+            var filenamediv = document.getElementById("meme-filename");
             console.log(i);
             if (selected.text === "Meme data") {
                 commentdiv.style.display = "none";
+
                 uploaddiv.style.display = "block";
+                filenamediv.style.display = "block";
             }
             else{
                 commentdiv.style.display = "block";
+
                 uploaddiv.style.display = "none";
+                filenamediv.style.display = "none";
             }
         }
 
@@ -148,11 +154,15 @@
 
         function uploadmeme() {
             let meme = document.getElementById('meme').files[0];
+
+            var myHeaders = new Headers();
+            myHeaders.append("x-token", idToken);
+
             // const upload_meme = (file) => {
-            invoke_url = 'https://7in6nk2539.execute-api.us-west-2.amazonaws.com/v13/upload-image/' + meme.name;
+            invoke_url = 'https://7in6nk2539.execute-api.us-west-2.amazonaws.com/v16/upload-image/' + meme.name;
             fetch(invoke_url, {
                 method: 'PUT',
-                headers: {},
+                headers: myHeaders,
                 body: meme
             }).then(
                 response => response.json() // if the response is a JSON object
@@ -183,6 +193,7 @@
             let zip = document.getElementById('zip').value;
             let meme = document.getElementById('meme').files[0];
             let com = document.getElementById('userComment').value;
+            let filename = document.getElementById('filename').value;
 
             let commentTypeSelect = document.getElementById("commentType");
             let selected = commentTypeSelect.options[commentTypeSelect.selectedIndex];
@@ -212,17 +223,20 @@
                     }
                 }, 
                 "CreationDate": today.getTime(), 
-                "Filename": ((selected.text === "Meme data") ? meme.name : ""),
+                "Filename": filename,
                 "UserComment": com
             };
+
+            var myHeaders = new Headers();
+            myHeaders.append("x-token", idToken);
 
             // window.alert(today.getTime());
 
             if(selected.text === "Meme data") {
-                invoke_url = 'https://7in6nk2539.execute-api.us-west-2.amazonaws.com/v13/upload-image-data/' + username + today.getTime() + ".json";
+                invoke_url = 'https://7in6nk2539.execute-api.us-west-2.amazonaws.com/v16/upload-image-data/' + username + today.getTime() + ".json";
                 fetch(invoke_url, {
                     method: 'PUT',
-                    headers: {},
+                    headers: myHeaders,
                     body: JSON.stringify(json, null, 4)
                 }).then(
                     response => response.json() // if the response is a JSON object
@@ -233,10 +247,10 @@
                 );
             }
             else {
-                invoke_url = 'https://7in6nk2539.execute-api.us-west-2.amazonaws.com/v13/upload-text-data/' + username + today.getTime() + ".json";
+                invoke_url = 'https://7in6nk2539.execute-api.us-west-2.amazonaws.com/v16/upload-text-data/' + username + today.getTime() + ".json";
                 fetch(invoke_url, {
                     method: 'PUT',
-                    headers: {},
+                    headers: myHeaders,
                     body: JSON.stringify(json, null, 4)
                 }).then(
                     response => response.json() // if the response is a JSON object
@@ -337,6 +351,11 @@
                         <div id="comment">
                             <label for="userComment">Comment</label>
                             <input type="text" id="userComment" placeholder="Dope website!!">
+                        </div>
+
+                        <div id="meme-filename" style="display: none;">
+                            <label for="filename">Filename</label>
+                            <input type="text" id="filename" placeholder="silly_cat_meme.jpeg">
                         </div>
                         <br>
                         <button type="button" name="submit" onclick="uploadData()">Submit</button>
